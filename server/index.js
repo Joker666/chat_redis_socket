@@ -4,7 +4,7 @@ import express from 'express';
 import routes from './routes';
 import wsRoutes from './wsRoutes';
 import WebSocket from 'ws';
-import { ConnectDB } from './db/db';
+import db from './db/db';
 
 const app = express();
 const router = express.Router();
@@ -18,13 +18,13 @@ app.get('*', (req, res) => res.status(200).send({
 }));
 
 // Connect to DB
-ConnectDB().then((db) => {
+db.Connect().then(() => {
     app.listen(process.env.PORT, () =>
         console.log(`Chat app listening on port ${process.env.PORT}!`),
     );
 
     const wss = new WebSocket.Server({ port: process.env.WS_PORT });
     wss.on('connection', function connection(ws, req) {
-        wsRoutes(ws, req, db);
+        wsRoutes(ws, req);
     });
 });

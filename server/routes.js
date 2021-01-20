@@ -5,5 +5,5 @@ module.exports = (router) => {
         res.send('Hello World!');
     });
 
-    router.post('/message', messageCtrl.create);
+    router.get('/api/messages/:roomID', messageCtrl.list);
 }

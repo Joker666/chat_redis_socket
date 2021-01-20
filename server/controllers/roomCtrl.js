@@ -1,7 +1,9 @@
+import db from '../db/db';
+
 module.exports = {
-    async join(ws, req, db, data) {
-        const users = db.collection("users");
-        const rooms = db.collection("rooms");
+    async join(ws, req, data) {
+        const users = db.Get().collection("users");
+        const rooms = db.Get().collection("rooms");
         try {
             let userFilter = { name: data.name };
             let user = await users.findOne(userFilter);
@@ -22,7 +24,6 @@ module.exports = {
             }
             ws.userID = user._id;
 
-
             let roomFilter = { name: 'main' };
             let room = await rooms.findOne(roomFilter);
             if (room) {
@@ -34,6 +35,7 @@ module.exports = {
                     const updateDoc = {
                         $set: {
                             participants: participants,
+                            updatedAt: Date.now(),
                         },
                     };
                     await rooms.updateOne(roomFilter, updateDoc);
@@ -46,12 +48,15 @@ module.exports = {
                 }
                 room = await rooms.insertOne(room);
             }
+            ws.roomID = room._id;
+
+            ws.send(JSON.stringify({status: 'Connected'}));
         } catch (e) {
             console.log(e);
         }
     },
 
-    async leave(ws, db) {
-        const rooms = db.collection("rooms");
+    async leave(ws) {
+        const rooms = db.Get().collection("rooms");
     }
 };
