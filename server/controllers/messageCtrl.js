@@ -1,4 +1,5 @@
 import db from '../db/db';
+import redis from '../db/redis';
 const { ObjectId } = require("mongodb");
 
 module.exports = {
@@ -11,7 +12,10 @@ module.exports = {
                 roomID: ws.roomID,
                 createdAt: Date.now(),
             }
-            message = await messages.insertOne(message);
+            let result = await messages.insertOne(message);
+
+            // Publish to all clients
+            redis.GetPublisher().publish('message:new', JSON.stringify(result.ops[0]));
         } catch (e) {
             console.log(e);
         }

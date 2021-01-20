@@ -22,6 +22,11 @@ services:
       - mongodb:/data/db
       - mongodb_config:/data/configdb
 
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+
 volumes:
   mongodb:
   mongodb_config:
