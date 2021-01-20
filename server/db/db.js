@@ -5,7 +5,7 @@ const dbClient = new MongoClient(process.env.DB_URI, { useUnifiedTopology: true 
 
 async function ConnectDB() {
     try {
-        Logger.setLevel("debug");
+        Logger.setLevel("info");
         await dbClient.connect();
         let db = await dbClient.db(process.env.DB_NAME);
         db.command({ ping: 1 });

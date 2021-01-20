@@ -12,4 +12,8 @@ module.exports = (ws, req, db) => {
                 console.log("Hello");
         }
     });
+
+    ws.on('close', async function close() {
+        await roomCtrl.leave(ws, db);
+    });
 }
