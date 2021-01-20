@@ -19,6 +19,8 @@ app.get('*', (req, res) => res.status(200).send({
 }));
 
 redis.Connect();
+redis.GetSubscriber().subscribe('join:new');
+redis.GetSubscriber().subscribe('join:left');
 redis.GetSubscriber().subscribe('message:new');
 
 // Connect to DB
@@ -30,14 +32,14 @@ db.Connect().then(() => {
     const wss = new WebSocket.Server({ port: process.env.WS_PORT });
     wss.on('connection', function connection(ws, req) {
         wsRoutes(ws, req);
+    });
 
-        redis.GetSubscriber().on('message', (channel, message) => {
-            console.log("Message '" + message + "' on channel '" + channel + "' arrived!");
-            wss.clients.forEach(function each(client) {
-                if (client !== ws && client.readyState === WebSocket.OPEN) {
-                    client.send(message);
-                }
-            });
+    redis.GetSubscriber().on('message', (channel, message) => {
+        console.log("Message '" + message + "' on channel '" + channel + "' arrived!");
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
         });
     });
 });

@@ -16,16 +16,16 @@ module.exports = {
                     },
                 };
                 await users.updateOne(userFilter, updateDoc);
-                ws.userID = user._id;
             } else {
-                let user = {
+                user = {
                     name: data.name,
                     ipAddress: req.socket.remoteAddress,
                     lastJoinedAt: Date.now(),
                 }
                 let result = await users.insertOne(user);
-                ws.userID = result.ops[0]._id;
+                user = result.ops[0];
             }
+            ws.userID = user._id;
 
             let roomFilter = { name: 'main' };
             let room = await rooms.findOne(roomFilter);
@@ -43,16 +43,17 @@ module.exports = {
                     };
                     await rooms.updateOne(roomFilter, updateDoc);
                 }
-                ws.roomID = room._id;
+
             } else {
-                let room = {
+                room = {
                     name: 'main',
                     participants: [ws.userID],
                     updatedAt: Date.now(),
                 }
                 let result = await rooms.insertOne(room);
-                ws.roomID = result.ops[0]._id;
+                room = result.ops[0];
             }
+            ws.roomID = room._id;
 
             ws.send(JSON.stringify({status: 'Connected', user: user, room: room }));
             // Publish to all clients
