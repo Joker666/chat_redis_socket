@@ -2,12 +2,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const msgerForm = get(".msger-inputarea");
     const msgerInput = get(".msger-input");
     const msgerChat = get(".msger-chat");
+    const newJoin = get("#new-join");
 
     let ws = new WebSocket(`ws://localhost:7424`);
     let connected = false;
     let user = null;
     let room = null;
     let meta = null;
+    let joinTimeout = null;
+    let leaveTimeout = null;
     let messages = [];
     let prompt = window.prompt('Enter your name:');
 
@@ -28,10 +31,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let message = JSON.parse(data.message);
         switch (data.channel) {
             case 'join:new':
+                user = message.user;
+                room = message.room;
                 if (message.user.name === prompt) {
                     connected = true;
-                    user = message.user;
-                    room = message.room;
 
                     fetch('http://localhost:2312/api/messages/' + message.room._id)
                         .then(response => response.json())
@@ -47,6 +50,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
                                 }
                             });
                         });
+                } else {
+                    clearTimeout(joinTimeout);
+                    clearTimeout(leaveTimeout);
+                    newJoin.textContent = `${user.name} just joined`;
+                    joinTimeout = setTimeout(() => {
+                        newJoin.textContent = '';
+                    }, 3000);
                 }
                 break;
             case 'message:new':
@@ -54,6 +64,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 if (user._id !== message.user._id) {
                     appendMessage(message.user.name, SECOND_PERSON_IMG, "left", message.message.text);
                 }
+                break;
+            case 'join:left':
+                clearTimeout(leaveTimeout);
+                clearTimeout(joinTimeout);
+                newJoin.textContent = `${message.user.name} just left`;
+                leaveTimeout = setTimeout(() => {
+                    newJoin.textContent = '';
+                }, 3000);
                 break;
             default:
                 console.log(data.channel);

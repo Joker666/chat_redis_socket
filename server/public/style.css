@@ -50,6 +50,11 @@ body {
     color: #666;
 }
 
+.msger-header-options {
+    color: darkgreen;
+    font-weight: bold;
+}
+
 .msger-chat {
     flex: 1;
     overflow-y: auto;
