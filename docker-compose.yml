@@ -6,7 +6,8 @@ services:
     image: hasan/chat/api/1
     restart: "no"
     environment:
-      DB_URI: "postgres://postgres:password@postgresql:5432/hasan-node-postgres-1"
+      DB_URI: "mongodb://mongo:27017/"
+      REDIS_HOST: "redis"
     ports:
       - 2312:2312
       - 7424:7424
