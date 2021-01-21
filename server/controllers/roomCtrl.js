@@ -55,7 +55,6 @@ module.exports = {
             }
             ws.roomID = room._id;
 
-            ws.send(JSON.stringify({status: 'Connected', user: user, room: room }));
             // Publish to all clients
             redis.GetPublisher().publish('join:new', JSON.stringify({ user: user, room: room }));
         } catch (e) {

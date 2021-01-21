@@ -1,23 +1,23 @@
 let ws = new WebSocket(`ws://localhost:7424`);
 let connected = false;
+let prompt = window.prompt('Enter your name:');
 
 ws.onopen = function(e) {
     console.log('[open] Connection established');
-    console.log('Sending to server');
-    ws.send(JSON.stringify({intent: 'join', data: {name: 'Rafi'}}));
-    setInterval(() => {
-        if (connected) {
-            console.log('Sending message');
-            ws.send(JSON.stringify({intent: 'send', data: {text: 'Hello World'}}));
-        }
-    }, 3000);
+    // ws.send(JSON.stringify({intent: 'send', data: {text: 'Hello World'}}));
+    if (prompt) {
+        ws.send(JSON.stringify({intent: 'join', data: {name: prompt}}));
+    }
 };
 
 ws.onmessage = function(event) {
     console.log(`[message] Data received from server: ${event.data}`);
     let data = JSON.parse(event.data);
-    if (data.status && data.status === 'Connected') {
-        connected = true;
+    let message = JSON.parse(data.message);
+    if (data.channel === 'join:new') {
+        if (message.user.name === prompt) {
+            connected = true;
+        }
     }
 };
 

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon --exec babel-node server/index.js",
     "debug": "babel-node server/index.js",
+    "cluster": "babel-node server/cluster.js",
     "test": "echo \"No test specified\" && exit 0"
   },
   "keywords": [],

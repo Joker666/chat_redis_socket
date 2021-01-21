@@ -26,7 +26,7 @@ redis.GetSubscriber().subscribe('message:new');
 // Connect to DB
 db.Connect().then(() => {
     app.listen(process.env.PORT, () =>
-        console.log(`Chat app listening on port ${process.env.PORT}!`),
+        console.log(`Chat app listening on port ${process.env.PORT}! with process id (PID) ${process.pid}`),
     );
 
     const wss = new WebSocket.Server({ port: process.env.WS_PORT });
@@ -38,7 +38,7 @@ db.Connect().then(() => {
         console.log("Message '" + message + "' on channel '" + channel + "' arrived!");
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(message);
+                client.send(JSON.stringify({ channel: channel, message: message }));
             }
         });
     });
