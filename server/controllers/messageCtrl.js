@@ -27,7 +27,7 @@ module.exports = {
 
     async list(req, res) {
         let skip = 0;
-        let limit = 20;
+        let limit = 10;
 
         if (req.query.skip) {
             skip = parseInt(req.query.skip);
@@ -59,7 +59,7 @@ module.exports = {
 
         res.send({
             data: result,
-            meta: { skip: skip, limit: limit }
+            meta: { skip: skip, limit: limit, total: await messages.countDocuments({ roomID: ObjectId(req.params.roomID) }) }
         });
     }
 };

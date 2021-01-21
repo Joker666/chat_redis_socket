@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let ws = new WebSocket(`ws://localhost:7424`);
     let connected = false;
     let user = null;
+    let room = null;
     let meta = null;
     let messages = [];
     let prompt = window.prompt('Enter your name:');
@@ -30,12 +31,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 if (message.user.name === prompt) {
                     connected = true;
                     user = message.user;
+                    room = message.room;
 
                     fetch('http://localhost:2312/api/messages/' + message.room._id)
                         .then(response => response.json())
                         .then(data => {
                             meta = data.meta;
-                            messages = data.data;
+                            messages = data.data.reverse();
 
                             messages.forEach((each) => {
                                 if (each.userID === user._id) {
@@ -81,7 +83,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
         msgerInput.value = "";
     });
 
-    function appendMessage(name, img, side, text) {
+    msgerChat.addEventListener("scroll", event => {
+        if (event.target.scrollTop === 0 && ((meta.skip + meta.limit) < meta.total)) {
+            fetch('http://localhost:2312/api/messages/' + room._id + '?skip=' + meta.limit)
+                .then(response => response.json())
+                .then(data => {
+                    meta = data.meta;
+                    messages = data.data;
+
+                    messages.forEach((each) => {
+                        if (each.userID === user._id) {
+                            appendMessage(FIRST_PERSON_NAME, FIRST_PERSON_IMG, "right", each.text, "afterbegin");
+                        } else {
+                            appendMessage(each.user.name, SECOND_PERSON_IMG, "left", each.text, "afterbegin");
+                        }
+                    });
+                });
+        }
+    });
+
+    function appendMessage(name, img, side, text, insertPosition = "beforeend") {
         const msgHTML = `
             <div class="msg ${side}-msg">
                 <div class="msg-img" style="background-image: url(${img})"></div>
@@ -97,7 +118,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             </div>
         `;
 
-        msgerChat.insertAdjacentHTML("beforeend", msgHTML);
+        msgerChat.insertAdjacentHTML(insertPosition, msgHTML);
         msgerChat.scrollTop += 500;
     }
 });
