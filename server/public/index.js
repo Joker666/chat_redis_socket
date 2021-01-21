@@ -6,7 +6,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let ws = new WebSocket(`ws://localhost:7424`);
     let connected = false;
     let user = null;
+    let meta = null;
+    let messages = [];
     let prompt = window.prompt('Enter your name:');
+
+    const SECOND_PERSON_IMG = "man.svg";
+    const FIRST_PERSON_IMG = "https://image.flaticon.com/icons/svg/145/145867.svg";
+    const FIRST_PERSON_NAME = prompt;
 
     ws.onopen = function(e) {
         console.log('[open] Connection established');
@@ -24,9 +30,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 if (message.user.name === prompt) {
                     connected = true;
                     user = message.user;
+
+                    fetch('http://localhost:2312/api/messages/' + message.room._id)
+                        .then(response => response.json())
+                        .then(data => {
+                            meta = data.meta;
+                            messages = data.data;
+
+                            messages.forEach((each) => {
+                                if (each.userID === user._id) {
+                                    appendMessage(FIRST_PERSON_NAME, FIRST_PERSON_IMG, "right", each.text);
+                                } else {
+                                    appendMessage(each.user.name, SECOND_PERSON_IMG, "left", each.text);
+                                }
+                            });
+                        });
                 }
                 break;
             case 'message:new':
+                messages.push(message.message);
                 if (user._id !== message.user._id) {
                     appendMessage(message.user.name, SECOND_PERSON_IMG, "left", message.message.text);
                 }
@@ -48,10 +70,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         console.log(`[error] ${error.message}`);
     };
 
-    const SECOND_PERSON_IMG = "man.svg";
-    const FIRST_PERSON_IMG = "https://image.flaticon.com/icons/svg/145/145867.svg";
-    const FIRST_PERSON_NAME = prompt;
-
     msgerForm.addEventListener("submit", event => {
         event.preventDefault();
 
@@ -62,22 +80,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
         ws.send(JSON.stringify({intent: 'send', data: {text: msgText}}));
         msgerInput.value = "";
     });
-});
 
-// Utils
-function get(selector, root = document) {
-    return root.querySelector(selector);
-}
-
-function formatDate(date) {
-    const h = "0" + date.getHours();
-    const m = "0" + date.getMinutes();
-
-    return `${h.slice(-2)}:${m.slice(-2)}`;
-}
-
-function appendMessage(name, img, side, text) {
-    const msgHTML = `
+    function appendMessage(name, img, side, text) {
+        const msgHTML = `
             <div class="msg ${side}-msg">
                 <div class="msg-img" style="background-image: url(${img})"></div>
                 
@@ -92,6 +97,19 @@ function appendMessage(name, img, side, text) {
             </div>
         `;
 
-    msgerChat.insertAdjacentHTML("beforeend", msgHTML);
-    msgerChat.scrollTop += 500;
+        msgerChat.insertAdjacentHTML("beforeend", msgHTML);
+        msgerChat.scrollTop += 500;
+    }
+});
+
+// Utils
+function get(selector, root = document) {
+    return root.querySelector(selector);
+}
+
+function formatDate(date) {
+    const h = "0" + date.getHours();
+    const m = "0" + date.getMinutes();
+
+    return `${h.slice(-2)}:${m.slice(-2)}`;
 }

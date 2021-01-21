@@ -37,10 +37,28 @@ module.exports = {
         }
         const messages = db.Get().collection("messages");
         const options = { sort: { createdAt: -1 }, skip: skip, limit: limit }
-        const cursor = messages.find({ roomID: ObjectId(req.params.roomID) }, options);
-        const allValues = await cursor.toArray();
+        const mResult = messages.find({ roomID: ObjectId(req.params.roomID) }, options);
+        const mValues = await mResult.toArray();
+
+        let userIDs = mValues.map(each => {
+            return ObjectId(each.userID);
+        });
+
+        const users = db.Get().collection("users");
+        let mUsers = users.find( { _id: { $in: userIDs } } );
+        const rUsers = await mUsers.toArray();
+
+        const result = mValues.map(each => {
+            rUsers.forEach(u => {
+                if (each.userID.equals(u._id)) {
+                    each.user = u;
+                }
+            });
+            return each;
+        });
+
         res.send({
-            data: allValues,
+            data: result,
             meta: { skip: skip, limit: limit }
         });
     }
