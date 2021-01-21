@@ -12,7 +12,7 @@ module.exports = (ws, req) => {
                 await messageCtrl.create(ws, req, m.data);
                 break;
             default:
-                console.log("Hello");
+                console.log(m.intent);
         }
     });
 

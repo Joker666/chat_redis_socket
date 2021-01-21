@@ -5,6 +5,7 @@ const { ObjectId } = require("mongodb");
 module.exports = {
     async create(ws, req, data) {
         const messages = db.Get().collection("messages");
+        const users = db.Get().collection("users");
         try {
             let message = {
                 text: data.text,
@@ -14,8 +15,11 @@ module.exports = {
             }
             let result = await messages.insertOne(message);
 
+            let userFilter = { _id: ObjectId(ws.userID) };
+            let user = await users.findOne(userFilter);
+
             // Publish to all clients
-            redis.GetPublisher().publish('message:new', JSON.stringify(result.ops[0]));
+            redis.GetPublisher().publish('message:new', JSON.stringify({ message: result.ops[0], user: user }));
         } catch (e) {
             console.log(e);
         }
