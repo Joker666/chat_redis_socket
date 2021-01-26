@@ -13,7 +13,7 @@ An easy way to get started with a Express server with Node.js.
 
 ## Installation
 
-* `git clone git@github.com:rwieruch/node-express-server.git`
-* `cd node-express-server`
+* `git clone git@github.com:Joker666/chat_redis_socket.git`
+* `cd chat_redis_socket`
 * `npm install`
 * `npm start`
