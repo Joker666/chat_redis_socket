@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let message = JSON.parse(data.message);
         switch (data.channel) {
             case 'join:new':
-                if (message.user.name === prompt) {
+                user = message.user;
+                room = message.room;
+                if (user.name === prompt) {
                     connected = true;
-                    user = message.user;
-                    room = message.room;
 
                     fetch('http://localhost:2312/api/messages/' + message.room._id)
                         .then(response => response.json())
