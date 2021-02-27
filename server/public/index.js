@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     msgerChat.addEventListener("scroll", event => {
         if (event.target.scrollTop === 0 && ((meta.skip + meta.limit) < meta.total)) {
-            fetch('http://localhost:2312/api/messages/' + room._id + '?skip=' + meta.limit)
+            fetch('http://localhost:2312/api/messages/' + room._id + '?skip=' + (meta.skip + meta.limit))
                 .then(response => response.json())
                 .then(data => {
                     meta = data.meta;
